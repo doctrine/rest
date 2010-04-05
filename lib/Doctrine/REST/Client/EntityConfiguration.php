@@ -39,6 +39,7 @@ class EntityConfiguration
     private $_prototype;
     private $_reflection;
     private $_reflectionProperties = array();
+    private $_properties = array();
 
     private $_attributes = array(
         'class' => null,
@@ -85,12 +86,20 @@ class EntityConfiguration
 
     public function setValue($entity, $field, $value)
     {
-        $this->_reflectionProperties[$field]->setValue($entity, $value);
+        if (isset($this->_reflectionProperties[$field])) {
+            $this->_reflectionProperties[$field]->setValue($entity, $value);
+        } else {
+            $entity->$field = $value;
+        }
     }
 
     public function getValue($entity, $field)
     {
-        return $this->_reflectionProperties[$field]->getValue($entity);
+        if (isset($this->_reflectionProperties[$field])) {
+            return $this->_reflectionProperties[$field]->getValue($entity);
+        } else {
+            return isset($entity->$field) ? $entity->$field : null;
+        }
     }
 
     public function generateUrl(array $options)
