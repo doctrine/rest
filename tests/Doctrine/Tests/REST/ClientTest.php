@@ -43,7 +43,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(1, $test->getId());
         $this->assertEquals('http://api.people.com/article.xml', $this->client->last['url']);
-        $this->assertEquals('PUT', $this->client->last['method']);
+        $this->assertEquals('POST', $this->client->last['method']);
     }
 
     public function testUpdate()
@@ -55,7 +55,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals('test', $test->getTitle());
         $this->assertEquals('http://api.people.com/article/1.xml', $this->client->last['url']);
-        $this->assertEquals('POST', $this->client->last['method']);
+        $this->assertEquals('PUT', $this->client->last['method']);
     }
 
     public function testDelete()
@@ -201,10 +201,10 @@ class TestClient extends Client
         $this->last = get_defined_vars();
 
         if ($url === 'http://api.people.com/article.xml') {
-            if ($method === Client::PUT)
+            if ($method === Client::POST)
             {
                 return array('id' => 1, 'title' => 'test');
-            } else if ($method === Client::POST) {
+            } else if ($method === Client::PUT) {
                 return $parameters;
             } else if ($method === Client::GET) {
                 return array(

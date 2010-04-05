@@ -130,7 +130,7 @@ class TestFunctionalClient extends Client
         }
 
         // PUT api/user.xml (insert)
-        if ($method === 'PUT' && preg_match_all('/api\/' . $this->name . '.xml/', $url, $matches)) {
+        if ($method === 'POST' && preg_match_all('/api\/' . $this->name . '.xml/', $url, $matches)) {
             return $this->execServer($request, array(
                 '_method' => $method,
                 '_format' => $responseType,
@@ -141,7 +141,7 @@ class TestFunctionalClient extends Client
 
 
         // POST api/user/1.xml (update)
-        if ($method === 'POST' && preg_match_all('/api\/' . $this->name . '\/([0-9]).xml/', $url, $matches)) {
+        if ($method === 'PUT' && preg_match_all('/api\/' . $this->name . '\/([0-9]).xml/', $url, $matches)) {
             return $this->execServer($request, array(
                 '_method' => $method,
                 '_format' => $responseType,

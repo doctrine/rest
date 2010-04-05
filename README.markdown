@@ -20,7 +20,7 @@ Now we can change some properties of that person:
 
 Once we're done we can simply save it and the appropriate REST call will be made:
 
-    $person->save(); // POST http://api.people.com/person/1.xml (name=Jonathan H. Wage)
+    $person->save(); // PUT http://api.people.com/person/1.xml (name=Jonathan H. Wage)
 
 ## Client
 
@@ -67,7 +67,7 @@ execute it, transform the response and hydrate the results to your PHP objects.
 
     $person = new Person();
     $person->setName('Jonathan H. Wage');
-    $person->save(); // PUT http://api.people.com/person.xml (name=Jonathan H. Wage)
+    $person->save(); // POST http://api.people.com/person.xml (name=Jonathan H. Wage)
 
 We can retrieve that person again now:
 
