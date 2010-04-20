@@ -34,17 +34,12 @@ class GetAction extends AbstractAction
 {
     public function execute()
     {
-        $query = $this->_getFindByIdQuery(
-            $this->_resolveEntityAlias($this->_request['_entity']),
-            $this->_request['_id']
-        );
-        $this->_setQueryFirstAndMax($query);
+        $entity = $this->_findEntityById();
 
-        $result = $query->getSingleResult();
-
-        if ( ! $result) {
-            throw new \InvalidArgumentException(sprintf('Could not find the "%s" with an ids of "%s"', $this->_request['_entity'], implode(', ', (array) $this->_request['_id'])));
+        if ( ! $entity) {
+            throw new \InvalidArgumentException(sprintf('Could not find the "%s" with an id of "%s"', $this->_request['_entity'], implode(', ', (array) $this->_request['_id'])));
         }
-        return $result;
+
+        return $entity;
     }
 }

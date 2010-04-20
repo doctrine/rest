@@ -27,7 +27,7 @@ spl_autoload_register('Doctrine\Tests\REST\autoload');
 set_include_path(
     __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'lib'
     . PATH_SEPARATOR .
-    '/Users/jwage/Sites/doctrine2/lib'
+    '/Users/jwage/Sites/doctrine2git/lib'
     . PATH_SEPARATOR .
     get_include_path() 
 );

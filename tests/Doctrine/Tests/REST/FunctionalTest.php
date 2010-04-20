@@ -17,12 +17,13 @@ class FunctionalTest extends \PHPUnit_Framework_TestCase
     private $_manager;
     private $_client;
 
-    public function setUp()
+    public function setUpRest($type)
     {
         $config = new \Doctrine\ORM\Configuration();
         $config->setMetadataCacheImpl(new \Doctrine\Common\Cache\ArrayCache);
         $config->setProxyDir('/tmp');
         $config->setProxyNamespace('Proxies');
+        $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver());
 
         $connectionOptions = array(
           'driver' => 'pdo_sqlite',
@@ -36,7 +37,11 @@ class FunctionalTest extends \PHPUnit_Framework_TestCase
         $schemaTool->dropSchema($classes);
         $schemaTool->createSchema($classes);
 
-        $this->_client = new TestFunctionalClient('user', $em);
+        if ($type === 'orm') {
+            $this->_client = new TestFunctionalClient('user', $em);
+        } else {
+            $this->_client = new TestFunctionalClient('user', $em->getConnection());
+        }
 
         $this->_manager = new Manager($this->_client);
         $this->_manager->registerEntity('Doctrine\Tests\REST\User');
@@ -44,7 +49,19 @@ class FunctionalTest extends \PHPUnit_Framework_TestCase
         Entity::setManager($this->_manager);
     }
 
-    public function testIdentityMap()
+    public function testOrm()
+    {
+        $this->setUpRest('orm');
+        $this->_testActiveRecordApi();
+    }
+
+    public function testDbal()
+    {
+        $this->setUpRest('dbal');
+        $this->_testActiveRecordApi();
+    }
+
+    private function _testActiveRecordApi()
     {
         $user1 = new User();
         $user1->setUsername('jwage');
@@ -64,6 +81,12 @@ class FunctionalTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(3, $user3->getId());
 
+        $user3->setUsername('romanb_new');
+        $user3->save();
+
+        $user3test = User::find($user3->getId());
+        $this->assertEquals('romanb_new', $user3test->getUsername());
+
         $test = User::findAll();
         $this->assertEquals(3, count($test));
         $this->assertTrue($user1 === $test[0]);
@@ -73,6 +96,7 @@ class FunctionalTest extends \PHPUnit_Framework_TestCase
         $user3->delete();
 
         $test = User::findAll();
+
         $this->assertEquals(2, count($test));
     }
 }
@@ -80,21 +104,23 @@ class FunctionalTest extends \PHPUnit_Framework_TestCase
 class TestFunctionalClient extends Client
 {
     public $name;
-    public $ormEm;
+    public $source;
     public $data = array();
     public $count = 0;
 
-    public function __construct($name, $ormEm)
+    public function __construct($name, $source)
     {
         $this->name = $name;
-        $this->ormEm = $ormEm;
+        $this->source = $source;
     }
 
     public function execServer($request, $requestArray, $parameters = array(), $responseType = 'xml')
     {
         $requestArray = array_merge($requestArray, (array) $parameters);
-        $server = new Server($this->ormEm, $requestArray);
-        $server->addEntityAlias('Doctrine\Tests\REST\DoctrineUser', 'user');
+        $server = new Server($this->source, $requestArray);
+        if ($this->source instanceof EntityManager) {
+            $server->setEntityAlias('Doctrine\Tests\REST\DoctrineUser', 'user');
+        }
         $response = $server->getRequestHandler()->execute();
         $data = $request->getResponseTransformerImpl()->transform($response->getContent());
         return $data;
@@ -193,7 +219,7 @@ class User extends Entity
 
 /**
  * @Entity
- * @Table(name="User")
+ * @Table(name="user")
  */
 class DoctrineUser
 {

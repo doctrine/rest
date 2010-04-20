@@ -1,0 +1,74 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+        <title>jAct demo</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js"></script>
+        <script src="jActiveResource.js"></script>
+        
+        <script>
+        function loadEditForm(id) {
+          User.find(id, function(user) {
+            $('#identifier').attr('value', user.id);
+            $('#username').attr('value', user.username);
+            $('#password').attr('value', user.username);
+          });
+        }
+
+        $(function() {
+          jActiveResource.define('User', {
+            url: 'http://localhost/rest/server.php/user',
+
+            username: null,
+            password: null,
+
+            toString: function () {
+              return 'username=' + this.username + '&password=' + this.password;
+            }
+          });
+
+          User.findAll(null, function(users) {
+            for (var i in users) {
+              user = users[i];
+              $('#users').append('<li id="user_' + user.id + '">' + user.id + ': ' + user.username + ' <a href="javascript: loadEditForm(' + user.id + ');">Edit</a> | <a href="javascript: UserFactory.destroy(' + user.id + ', function(data) { $(\'#user_\' + ' + user.id + ').remove(); });">Delete</a></li>');
+            }
+          });
+          
+          $('#create_user').submit(function(data) {
+            var user = User.create();
+
+            user.id = $('#identifier').attr('value');
+            user.username = $('#username').attr('value');
+            user.password = $('#password').attr('value');
+
+            user.save(function (user) {
+              if ($('#user_' + user.id).length) {
+                $('#user_' + user.id).after('<li id="user_' + user.id + '">' + user.id + ': ' + user.username + ' <a href="javascript: loadEditForm(' + user.id + ');">Edit</a> | <a href="javascript: UserFactory.destroy(' + user.id + ', function(data) { $(\'#user_\' + ' + user.id + ').remove(); });">Delete</a></li>').remove();
+              } else {
+                $('#users').append('<li id="user_' + user.id + '">' + user.id + ': ' + user.username + ' <a href="javascript: loadEditForm(' + user.id + ');">Edit</a> | <a href="javascript: UserFactory.destroy(' + user.id + ', function(data) { $(\'#user_\' + ' + user.id + ').remove(); });">Delete</a></li>');
+              }
+            });
+
+            return false;
+          });
+        });
+        </script>
+        
+    </head>
+    <body>
+
+    <h2>Create User</h3>
+    <form id="create_user">
+      <input type="hidden" name="identifier" id="identifier" />
+      Username: <input type="text" id="username" name="username" /><br/>
+      Password: <input type="password" id="password" name="password" /><br/>
+      <input type="submit" name="save" value="Save" />
+    </form>
+
+    <h2>Users</h2>
+    <ul id="users">
+      
+    </ul>
+
+    </body>
+</html>

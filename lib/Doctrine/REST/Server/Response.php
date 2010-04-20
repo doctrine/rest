@@ -84,12 +84,14 @@ class Response
 
     private function _sendHeaders()
     {
-        if ( ! isset($_SERVER['PHP_AUTH_USER'])) {
-            header('WWW-Authenticate: Basic realm="Doctrine REST API"');
-            header('HTTP/1.0 401 Unauthorized');
-        } else {
-            if ( ! $this->_requestHandler->hasValidCredentials()) {
-                $this->setError('Invalid credentials specified.');
+        if ($this->_requestHandler->getUsername()) {
+            if ( ! isset($_SERVER['PHP_AUTH_USER'])) {
+                header('WWW-Authenticate: Basic realm="Doctrine REST API"');
+                header('HTTP/1.0 401 Unauthorized');
+            } else {
+                if ( ! $this->_requestHandler->hasValidCredentials()) {
+                    $this->setError('Invalid credentials specified.');
+                }
             }
         }
 
@@ -116,6 +118,9 @@ class Response
         }
 
         foreach($array as $key => $value) {
+            if (is_numeric($key)) {
+                $key = $rootNodeName . $key;
+            }
             $key = preg_replace('/[^A-Za-z_]/i', '', $key);
 
             if (is_array($value) && ! empty($value)) {
