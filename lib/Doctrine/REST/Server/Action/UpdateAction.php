@@ -30,15 +30,28 @@ namespace Doctrine\REST\Server\Action;
  * @version     $Revision$
  * @author      Jonathan H. Wage <jonwage@gmail.com>
  */
-class UpdateAction extends AbstractSaveAction
+class UpdateAction extends AbstractAction
 {
-    public function execute()
+    public function executeORM()
     {
-        if ($entity = $this->_em->find($this->_resolveEntityAlias($this->_request['_entity']), $this->_request['_id'])) {
+        if ($entity = $this->_findEntityById()) {
             $this->_updateEntityInstance($entity);
-            $this->_em->flush();
+            $this->_source->flush();
         }
 
         return $entity;
+    }
+
+    public function executeDBAL()
+    {
+        $entity = $this->_getEntity();
+        $identifierKey = $this->_getEntityIdentifierKey($entity);
+
+        $data = $this->_gatherData();
+        $this->_source->update($entity, $data, array(
+            $identifierKey => $this->_request['_id']
+        ));
+
+        return $this->_findEntityById();
     }
 }

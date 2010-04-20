@@ -21,7 +21,8 @@
 
 namespace Doctrine\REST\Server;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManager,
+    Doctrine\ORM\Connection;
 
 /**
  * Simple REST server facade.
@@ -38,11 +39,11 @@ class Server
     private $_request;
     private $_response;
 
-    public function __construct(EntityManager $em, array $requestData = array())
+    public function __construct($source, array $requestData = array())
     {
         $this->_request = new Request($requestData);
         $this->_response = new Response($this->_request);
-        $this->_requestHandler = new RequestHandler($em, $this->_request, $this->_response);
+        $this->_requestHandler = new RequestHandler($source, $this->_request, $this->_response);
     }
 
     public function execute()
@@ -51,14 +52,24 @@ class Server
         return $this->_requestHandler->getResponse()->getContent();
     }
 
-    public function addEntityAlias($entity, $alias)
+    public function setEntityIdentifierKey($entity, $identifierKey)
     {
-        $this->_requestHandler->addEntityAlias($entity, $alias);
+        $this->_requestHandler->setEntityIdentifierKey($entity, $identifierKey);
+    }
+
+    public function setEntityAlias($entity, $alias)
+    {
+        $this->_requestHandler->setEntityAlias($entity, $alias);
     }
 
     public function registerAction($action, $className)
     {
         $this->_requestHandler->registerAction($action, $className);
+    }
+
+    public function addEntityAction($entity, $action, $className)
+    {
+        $this->_requestHandler->addEntityAction($entity, $action, $className);
     }
 
     public function setUsername($username)

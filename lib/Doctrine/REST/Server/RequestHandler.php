@@ -21,7 +21,8 @@
 
 namespace Doctrine\REST\Server;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManager,
+    Doctrine\DBAL\Connection;
 
 /**
  * Class responsible for transforming a REST server request to a response.
@@ -34,13 +35,13 @@ use Doctrine\ORM\EntityManager;
  */
 class RequestHandler
 {
-    private $_em;
+    private $_source;
     private $_request;
     private $_response;
     private $_username;
     private $_password;
     private $_credentialsCallback;
-    private $_entityAliases = array();
+    private $_entities = array();
 
     private $_actions = array(
         'delete' => 'Doctrine\\REST\\Server\\Action\\DeleteAction',
@@ -50,25 +51,46 @@ class RequestHandler
         'list' => 'Doctrine\\REST\\Server\\Action\\ListAction'
     );
 
-    public function __construct(EntityManager $em, Request $request, Response $response)
+    public function __construct($source, Request $request, Response $response)
     {
-        $this->_em = $em;
+        $this->_source = $source;
         $this->_request = $request;
         $this->_response = $response;
         $this->_response->setRequestHandler($this);
         $this->_credentialsCallback = array($this, 'checkCredentials');
     }
 
-    public function addEntityAlias($entity, $alias)
+    public function configureEntity($entity, $configuration)
     {
-        $this->_entityAliases[$alias] = $entity;
+        $this->_entities[$entity] = $configuration;
+    }
+
+    public function setEntityAlias($entity, $alias)
+    {
+        $this->_entities[$entity]['alias'] = $alias;
+    }
+
+    public function addEntityAction($entity, $action, $className)
+    {
+        $this->_entities[$entity]['actions'][$action] = $className;
+    }
+
+    public function setEntityIdentifierKey($entity, $identifierKey)
+    {
+        $this->_entities[$entity]['identifierKey'] = $identifierKey;
+    }
+
+    public function getEntityIdentifierKey($entity)
+    {
+        return isset($this->_entities[$entity]['identifierKey']) ? $this->_entities[$entity]['identifierKey'] : 'id';
     }
 
     public function resolveEntityAlias($alias)
     {
-        if (isset($this->_entityAliases[$alias]))
-        {
-            return $this->_entityAliases[$alias];
+        foreach ($this->_entities as $entity => $configuration) {
+            if (isset($configuration['alias']) && $configuration['alias'] === $alias) {
+                return $entity;
+            }
         }
         return $alias;
     }
@@ -132,9 +154,9 @@ class RequestHandler
         return $this->_actions;
     }
 
-    public function getEntityManager()
+    public function getSource()
     {
-        return $this->_em;
+        return $this->_source;
     }
 
     public function getRequest()
@@ -147,47 +169,51 @@ class RequestHandler
         return $this->_response;
     }
 
+    public function getEntity()
+    {
+        return $this->resolveEntityAlias($this->_request['_entity']);
+    }
+
     public function execute()
     {
         try {
-            $this->_executeAction();
+            $entity = $this->getEntity();
+            $actionInstance = $this->getAction($entity, $this->_request['_action']);
+
+            if (method_exists($actionInstance, 'execute')) {
+                $result = $actionInstance->execute();
+            } else {
+                if ($this->_source instanceof EntityManager) {
+                    $result = $actionInstance->executeORM();
+                } else {
+                    $result = $actionInstance->executeDBAL();
+                }
+            }
+
+            $this->_response->setResponseData(
+                $this->_transformResultForResponse($result)
+            );
         } catch (\Exception $e) {
             $this->_response->setError($this->_getExceptionErrorMessage($e));
         }
         return $this->_response;
     }
 
-    public function getAction($actionName)
+    public function getAction($entity, $actionName)
     {
-        if ( ! is_object($this->_actions[$actionName])) {
-            $actionClassName = $this->_actions[$actionName];
-            if (class_exists($actionClassName)) {
+        if (isset($this->_actions[$actionName])) {
+            if ( ! is_object($this->_actions[$actionName])) {
+                $actionClassName = $this->_actions[$actionName];
                 $this->_actions[$actionName] = new $actionClassName($this);
-            } else {
-                throw new \Exception(sprintf('Invalid action specified %s', $actionName));
             }
+            return $this->_actions[$actionName];
         }
-        return $this->_actions[$actionName];
-    }
-
-    private function _executeAction()
-    {
-        $actionInstance = $this->getAction($this->_request['_action']);
-
-        $result = $actionInstance->execute();
-
-        if ($result !== false) {
-            $this->_response->setResponseData(
-                $this->_transformResultForResponse($result)
-            );
-        } else {
-            $this->_response->setError(
-                sprintf(
-                    'An error occurred executing the action named "%s" with a request method of "%s."',
-                    $this->_request['_action'],
-                    $this->_request['_method']
-                )
-            );
+        if (isset($this->_entities[$entity]['actions'][$actionName])) {
+            if ( ! is_object($this->_entities[$entity]['actions'][$actionName])) {
+                $actionClassName = $this->_entities[$entity]['actions'][$actionName];
+                $this->_entities[$entity]['actions'][$actionName] = new $actionClassName($this);
+            }
+            return $this->_entities[$entity]['actions'][$actionName];
         }
     }
 
@@ -209,12 +235,12 @@ class RequestHandler
         }
         if (is_object($result)) {
             $entityName = get_class($result);
-            try {
-                $class = $this->_em->getMetadataFactory()->getMetadataFor($entityName);
+            if ($this->_source instanceof EntityManager) {
+                $class = $this->_source->getMetadataFactory()->getMetadataFor($entityName);
                 foreach ($class->fieldMappings as $fieldMapping) {
                     $array[$fieldMapping['fieldName']] = $class->getReflectionProperty($fieldMapping['fieldName'])->getValue($result);
                 }
-            } catch (\Exception $e) {
+            } else {
                 $vars = get_object_vars($result);
                 foreach ($vars as $key => $value) {
                     $array[$key] = $value;

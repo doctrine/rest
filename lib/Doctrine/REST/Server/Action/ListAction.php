@@ -32,11 +32,12 @@ namespace Doctrine\REST\Server\Action;
  */
 class ListAction extends AbstractAction
 {
-    public function execute()
+    public function executeORM()
     {
-        $qb = $this->_em->createQueryBuilder()
+        $entity = $this->_getEntity();
+        $qb = $this->_source->createQueryBuilder()
             ->select('a')
-            ->from($this->_resolveEntityAlias($this->_request['_entity']), 'a');
+            ->from($entity, 'a');
 
         $data = $this->_gatherData();
         foreach ($data as $key => $value) {
@@ -46,7 +47,28 @@ class ListAction extends AbstractAction
 
         $query = $qb->getQuery();
         $this->_setQueryFirstAndMax($query);
-        $collection = $query->execute();
-        return $collection;
+        $results = $query->execute();
+
+        return $results;
+    }
+
+    public function executeDBAL()
+    {
+        $entity = $this->_getEntity();
+
+        $params = array();
+        $query = sprintf('SELECT * FROM %s', $entity);
+        if ($data = $this->_gatherData()) {
+            $query .= ' WHERE ';
+            foreach ($data as $key => $value) {
+                $query .= $key . ' = ? AND ';
+                $params[] = $value;
+            }
+            $query = substr($query, 0, strlen($query) - 5);
+        }
+        $query = $this->_setQueryFirstAndMax($query);
+        $results = $this->_source->fetchAll($query, $params);
+
+        return $results;
     }
 }

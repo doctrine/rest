@@ -30,16 +30,34 @@ namespace Doctrine\REST\Server\Action;
  * @version     $Revision$
  * @author      Jonathan H. Wage <jonwage@gmail.com>
  */
-class InsertAction extends AbstractSaveAction
+class InsertAction extends AbstractAction
 {
-    public function execute()
+    public function executeORM()
     {
-        $entityName = $this->_resolveEntityAlias($this->_request['_entity']);
-        $entity = new $entityName();
-        $this->_updateEntityInstance($entity);
-        $this->_em->persist($entity);
-        $this->_em->flush();
+        $entity = $this->_getEntity();
 
-        return $entity;
+        $instance = new $entity();
+        $this->_updateEntityInstance($instance);
+        $this->_source->persist($instance);
+        $this->_source->flush();
+
+        return $instance;
+    }
+
+    public function executeDBAL()
+    {
+        $entity = $this->_getEntity();
+        $identifierKey = $this->_getEntityIdentifierKey();
+
+        $data = $this->_gatherData();
+
+        unset($data['id']);
+        $this->_source->insert($entity, $data);
+        $data = array_merge(
+            array($identifierKey => $this->_source->lastInsertId()),
+            $data
+        );
+
+        return $data;
     }
 }

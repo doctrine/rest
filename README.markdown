@@ -97,7 +97,7 @@ the server request you want to process:
     );
 
     $server = new \Doctrine\REST\Server\Server($em, $request);
-    $server->addEntityAlias('Entities\User', 'user');
+    $server->setEntityAlias('Entities\User', 'user');
 
     $xml = $server->execute();
 

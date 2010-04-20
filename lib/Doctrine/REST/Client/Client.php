@@ -78,15 +78,12 @@ class Client
 
         switch ($request->getMethod()) {
             case self::POST:
+            case self::PUT:
                 curl_setopt($ch, CURLOPT_POST, 1);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($request->getParameters()));
                 break;
             case self::DELETE:
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
-                break;
-            case self::PUT:
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
-                curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($request->getParameters()));
                 break;
             case self::GET:
             default:

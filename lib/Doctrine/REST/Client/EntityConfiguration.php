@@ -85,7 +85,11 @@ class EntityConfiguration
 
     public function setValue($entity, $field, $value)
     {
-        $this->_reflectionProperties[$field]->setValue($entity, $value);
+        if (isset($this->_reflectionProperties[$field])) {
+            $this->_reflectionProperties[$field]->setValue($entity, $value);
+        } else {
+            $entity->$field = $value;
+        }
     }
 
     public function getValue($entity, $field)

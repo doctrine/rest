@@ -32,18 +32,22 @@ namespace Doctrine\REST\Server\Action;
  */
 class DeleteAction extends AbstractAction
 {
-    public function execute()
+    public function executeORM()
     {
-        $query = $this->_getFindByIdQuery(
-            $this->_resolveEntityAlias($this->_request['_entity']),
-            $this->_request['_id']
-        );
-        $entity = $query->getSingleResult();
-
-        if ($entity) {
-            $this->_em->remove($entity);
-            $this->_em->flush();
+        if ($entity = $this->_findEntityById()) {
+            $this->_source->remove($entity);
+            $this->_source->flush();
+            return $entity;
         }
-        return $entity;
+    }
+
+    public function executeDBAL()
+    {
+        if ($entity = $this->_findEntityById()) {
+            $this->_source->delete($this->_getEntity(), array(
+                $this->_getEntityIdentifierKey() => $this->_request['_id']
+            ));
+            return $entity;
+        }
     }
 }
