@@ -97,7 +97,7 @@ class Client
             $error = curl_error($ch);
             curl_close($ch);
 
-            throw new \Exception($errorNumer . ': ' . $error);
+            throw new \Exception($errorNumber . ': ' . $error);
         }
 
         curl_close($ch);
