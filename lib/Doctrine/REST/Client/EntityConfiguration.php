@@ -56,8 +56,7 @@ class EntityConfiguration
     {
         $this->_attributes['class'] = $class;
         $this->_attributes['urlGeneratorImpl'] = new StandardURLGenerator($this);
-        $this->_attributes['responseTransformerImpl'] = new StandardResponseTransformer();
-        $this->_attributes['responseTransformerImpl']->setEntityConfiguration($this);
+        $this->_attributes['responseTransformerImpl'] = new StandardResponseTransformer($this);
 
         $this->_reflection = new \ReflectionClass($class);
         foreach ($this->_reflection->getProperties() as $property) {

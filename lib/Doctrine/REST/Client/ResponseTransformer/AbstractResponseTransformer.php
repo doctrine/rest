@@ -39,7 +39,11 @@ abstract class AbstractResponseTransformer
 
     public function __construct($responseType=null)
     {
-        $this->_responseType = $responseType;
+        if(is_object($responseType) && get_class($responseType) == 'EntityConfiguration') { //legacy
+            $this->setEntityConfiguration($responseType);
+        } else {
+            $this->_responseType = $responseType;
+        }
     }
 
     public function setEntityConfiguration(EntityConfiguration $entityConfiguration)
