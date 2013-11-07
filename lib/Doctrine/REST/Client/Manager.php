@@ -91,6 +91,7 @@ class Manager
         $request->setParameters($parameters);
         $request->setUsername($configuration->getUsername());
         $request->setPassword($configuration->getPassword());
+        $request->setHeaders($configuration->getHeaders());
         $request->setResponseType($configuration->getResponseType());
         $request->setResponseTransformerImpl($configuration->getResponseTransformerImpl());
 

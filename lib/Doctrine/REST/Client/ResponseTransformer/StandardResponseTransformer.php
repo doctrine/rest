@@ -35,7 +35,7 @@ class StandardResponseTransformer extends AbstractResponseTransformer
 {
     public function transform($data)
     {
-        switch ($this->_entityConfiguration->getResponseType()) {
+        switch ($this->getResponseType()) {
             case 'xml':
                 return $this->xmlToArray($data);
             case 'json':

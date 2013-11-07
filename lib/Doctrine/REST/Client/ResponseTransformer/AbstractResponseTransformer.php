@@ -35,11 +35,31 @@ use Doctrine\REST\Client\EntityConfiguration;
 abstract class AbstractResponseTransformer
 {
     protected $_entityConfiguration;
+    protected $_responseType;
 
-    public function __construct(EntityConfiguration $entityConfiguration)
+    public function __construct($responseType=null)
+    {
+        $this->_responseType = $responseType;
+    }
+    public function setEntityConfiguration(EntityConfiguration $entityConfiguration)
     {
         $this->_entityConfiguration = $entityConfiguration;
     }
+
+    public function getResponseType() {
+        if($this->_responseType!=null) {
+            return $this->_responseType;
+        }
+        if($this->_entityConfiguration) {
+            return $this->_entityConfiguration->getResponseType();
+        }
+        return null;
+    }
+
+    public function setResponseType($responseType) {
+        $this->_responseType = $responseType;
+    }
+
 
     abstract public function transform($data);
 }
