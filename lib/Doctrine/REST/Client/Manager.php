@@ -149,12 +149,7 @@ class Manager
     private function _hydrate($configuration, $instance, $data)
     {
         foreach ($data as $key => $value) {
-            if (is_array($value))
-            {
-                $configuration->setValue($instance, $key, (string) $value);
-            } else {
-                $configuration->setValue($instance, $key, $value);
-            }
+            $configuration->setValue($instance, $key, $value);
         }
 
         return $instance;

@@ -38,6 +38,7 @@ class Request
     private $_headers = array();
     private $_username;
     private $_password;
+    private $_requestType;
     private $_responseType = 'xml';
     private $_responseTransformerImpl;
 
@@ -79,6 +80,16 @@ class Request
     public function getResponseType()
     {
         return $this->_responseType;
+    }
+
+    public function setRequestType($requestType)
+    {
+        $this->_requestType = $requestType;
+    }
+
+    public function getRequestType()
+    {
+        return ($this->_requestType?$this->_requestType:$this->getResponseType());
     }
 
     public function setUsername($username)
