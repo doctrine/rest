@@ -77,6 +77,6 @@ class StandardResponseTransformer extends AbstractResponseTransformer
 
     public function jsonToArray($json)
     {
-        return (array) json_decode($json);
+        return (array) json_decode($json, true);
     }
 }

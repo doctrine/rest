@@ -41,9 +41,15 @@ abstract class AbstractResponseTransformer
     {
         $this->_responseType = $responseType;
     }
+
     public function setEntityConfiguration(EntityConfiguration $entityConfiguration)
     {
         $this->_entityConfiguration = $entityConfiguration;
+    }
+
+    public function getEntityConfiguration()
+    {
+        return $this->_entityConfiguration;
     }
 
     public function getResponseType() {
