@@ -13,7 +13,9 @@
         "doctrine/common": "*"
     },
     "require-dev": {
-        "doctrine/orm": "~2.4.2"
+        "doctrine/orm": "~2.4.2",
+        "doctrine/dbal": "~2.4.2",
+        "phpunit/phpunit": "~3.7"
     },
     "autoload": {
         "psr-4": {
