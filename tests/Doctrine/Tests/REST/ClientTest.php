@@ -2,16 +2,14 @@
 
 namespace Doctrine\Tests\REST;
 
-use Doctrine\REST\Client\Manager,
-    Doctrine\REST\Client\Request,
-    Doctrine\REST\Client\Entity,
-    Doctrine\REST\Client\EntityConfiguration,
-    Doctrine\REST\Client\Client,
-    Entities\ServerTest\User;
+use Doctrine\REST\Client\Client;
+use Doctrine\REST\Client\Entity;
+use Doctrine\REST\Client\EntityConfiguration;
+use Doctrine\REST\Client\Manager;
+use Doctrine\REST\Client\Request;
+use Doctrine\Tests\DoctrineTestCase;
 
-require_once __DIR__ . '/TestInit.php';
-
-class ClientTest extends \PHPUnit_Framework_TestCase
+class ClientTest extends DoctrineTestCase
 {
     public function setUp()
     {
@@ -151,7 +149,7 @@ class Status extends Entity
         $entityConfiguration->setName('statuses');
         $entityConfiguration->setUsername('username');
         $entityConfiguration->setPassword('password');
-    }    
+    }
 }
 
 class ClientArticleTest extends Entity
