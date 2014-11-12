@@ -113,7 +113,7 @@ abstract class AbstractAction
 
             $query = sprintf('SELECT * FROM %s WHERE %s = ?', $entity, $identifierKey);
 
-            return $this->_source->fetchRow($query, array($this->_request['_id']));
+            return $this->_source->fetchAssoc($query, array($this->_request['_id']));
         }
     }
 
