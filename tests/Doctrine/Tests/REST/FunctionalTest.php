@@ -2,17 +2,16 @@
 
 namespace Doctrine\Tests\REST;
 
-use Doctrine\ORM\EntityManager,
-    Doctrine\REST\Client\Manager,
-    Doctrine\REST\Client\Request,
-    Doctrine\REST\Client\Entity,
-    Doctrine\REST\Client\EntityConfiguration,
-    Doctrine\REST\Client\Client,
-    Doctrine\REST\Server\Server;
+use Doctrine\ORM\EntityManager;
+use Doctrine\REST\Client\Manager;
+use Doctrine\REST\Client\Request;
+use Doctrine\REST\Client\Entity;
+use Doctrine\REST\Client\EntityConfiguration;
+use Doctrine\REST\Client\Client;
+use Doctrine\REST\Server\Server;
+use Doctrine\Tests\DoctrineTestCase;
 
-require_once __DIR__ . '/TestInit.php';
-
-class FunctionalTest extends \PHPUnit_Framework_TestCase
+class FunctionalTest extends DoctrineTestCase
 {
     private $_manager;
     private $_client;
@@ -137,7 +136,7 @@ class TestFunctionalClient extends Client
         if ($method === 'GET' && preg_match_all('/api\/' . $this->name . '\/([0-9]).xml/', $url, $matches)) {
             $id = $matches[1][0];
             return $this->execServer($request, array(
-                '_method' => $method, 
+                '_method' => $method,
                 '_format' => $responseType,
                 '_entity' => $this->name,
                 '_action' => 'get',

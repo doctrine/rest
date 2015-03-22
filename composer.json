@@ -1,0 +1,25 @@
+{
+    "name": "doctrine/rest",
+    "description": "Doctrine 2 REST Server and Client",
+    "homepage": "https://github.com/doctrine/rest",
+    "type": "library",
+    "keywords": ["database", "rest"],
+    "license": "MIT",
+    "authors": [
+        {"name": "Jonathan Wage", "email": "jonwage@gmail.com"}
+    ],
+    "require": {
+        "php": ">=5.3.2",
+        "doctrine/common": "*"
+    },
+    "require-dev": {
+        "doctrine/orm": "~2.4.2",
+        "doctrine/dbal": "~2.4.2",
+        "phpunit/phpunit": "~3.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Doctrine\\REST\\":  "lib/Doctrine/REST"
+        }
+    }
+}

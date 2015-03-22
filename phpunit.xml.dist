@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/3.7/phpunit.xsd"
+
+    backupGlobals="false"
+    backupStaticAttributes="false"
+    colors="true"
+    convertErrorsToExceptions="true"
+    convertNoticesToExceptions="true"
+    convertWarningsToExceptions="true"
+    processIsolation="false"
+    stopOnFailure="false"
+    bootstrap="./tests/Doctrine/Tests/TestInit.php"
+
+    strict="true"
+    verbose="true"
+>
+    <testsuites>
+        <testsuite name="Doctrine Rest Test Suite">
+            <directory>./tests/Doctrine/</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
