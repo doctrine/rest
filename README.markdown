@@ -1,3 +1,5 @@
+# THIS PROJECT IS NOT MAINTAINED
+
 # Doctrine 2 REST Server and Client
 
 The Doctrine 2 REST server and client component is both an easy way to spin up 
