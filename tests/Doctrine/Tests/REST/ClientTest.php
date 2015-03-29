@@ -4,13 +4,13 @@ namespace Doctrine\Tests\REST;
 
 use Doctrine\REST\Client\Client;
 use Doctrine\REST\Client\Entity;
-use Doctrine\REST\Client\EntityConfiguration;
 use Doctrine\REST\Client\Manager;
-use Doctrine\REST\Client\Request;
 use Doctrine\Tests\DoctrineTestCase;
 
 class ClientTest extends DoctrineTestCase
 {
+    private $client;
+
     public function setUp()
     {
         $this->client = new TestClient();
@@ -22,15 +22,42 @@ class ClientTest extends DoctrineTestCase
         Entity::setManager($manager);
     }
 
+    /**
+     * @test
+     *
+     * @covers Doctrine\REST\Client\Entity
+     * @covers Doctrine\REST\Client\EntityConfiguration
+     * @covers Doctrine\REST\Client\Manager
+     * @covers Doctrine\REST\Client\ResponseTransformer\AbstractResponseTransformer
+     * @covers Doctrine\REST\Client\URLGenerator\AbstractURLGenerator
+     * @covers Doctrine\REST\Client\URLGenerator\StandardURLGenerator
+     */
     public function testGetPath()
     {
-        $this->assertEquals('http://api.people.com/article/1.xml', ClientArticleTest::generateUrl(array('id' => 1)));
-        $this->assertEquals('http://api.people.com/article/1/test.xml', ClientArticleTest::generateUrl(array('id' => 1, 'action' => 'test')));
+        $this->assertEquals(
+            'http://api.people.com/article/1.xml',
+            ClientArticleTest::generateUrl(array('id' => 1))
+        );
 
-        $this->assertEquals('http://api.people.com/article.xml', ClientArticleTest::generateUrl());
-        $this->assertEquals('http://api.people.com/article/test.xml', ClientArticleTest::generateUrl(array('action' => 'test')));
+        $this->assertEquals(
+            'http://api.people.com/article/1/test.xml',
+            ClientArticleTest::generateUrl(array('id' => 1, 'action' => 'test'))
+        );
 
-        $this->assertEquals('http://api.people.com/article.xml?test=test', ClientArticleTest::generateUrl(array('parameters' => array('test' => 'test'))));
+        $this->assertEquals(
+            'http://api.people.com/article.xml',
+            ClientArticleTest::generateUrl()
+        );
+
+        $this->assertEquals(
+            'http://api.people.com/article/test.xml',
+            ClientArticleTest::generateUrl(array('action' => 'test'))
+        );
+
+        $this->assertEquals(
+            'http://api.people.com/article.xml?test=test',
+            ClientArticleTest::generateUrl(array('parameters' => array('test' => 'test')))
+        );
     }
 
     public function testInsert()
@@ -134,98 +161,5 @@ class ClientTest extends DoctrineTestCase
         $this->assertEquals(array('status' => 'updating my status'), $this->client->last['parameters']);
         $this->assertEquals('username', $this->client->last['username']);
         $this->assertEquals('password', $this->client->last['password']);
-    }
-}
-
-class Status extends Entity
-{
-    private $id;
-    private $status;
-    private $text;
-
-    public static function configure(EntityConfiguration $entityConfiguration)
-    {
-        $entityConfiguration->setUrl('http://twitter.com');
-        $entityConfiguration->setName('statuses');
-        $entityConfiguration->setUsername('username');
-        $entityConfiguration->setPassword('password');
-    }
-}
-
-class ClientArticleTest extends Entity
-{
-    private $id;
-    private $title;
-
-    public static function configure(EntityConfiguration $entityConfiguration)
-    {
-        $entityConfiguration->setUrl('http://api.people.com');
-        $entityConfiguration->setName('article');
-    }
-
-    public function setId($id)
-    {
-        $this->id = $id;
-    }
-
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    public function setTitle($title)
-    {
-        $this->title = $title;
-    }
-
-    public function getTitle()
-    {
-        return $this->title;
-    }
-}
-
-class TestClient extends Client
-{
-    public $last;
-
-    public function execute(Request $request)
-    {
-        $url = $request->getUrl();
-        $method = $request->getMethod();
-        $parameters = $request->getParameters();
-        $username = $request->getUsername();
-        $password = $request->getPassword();
-
-        $this->last = get_defined_vars();
-
-        if ($url === 'http://api.people.com/article.xml') {
-            if ($method === Client::PUT)
-            {
-                return array('id' => 1, 'title' => 'test');
-            } else if ($method === Client::POST) {
-                return $parameters;
-            } else if ($method === Client::GET) {
-                return array(
-                    'article' => array(
-                        array(
-                            'id' => 1,
-                            'title' => 'test1'
-                        ),
-                        array(
-                            'id' => 2,
-                            'title' => 'test2'
-                        )
-                    )
-                );
-            }
-            return array();
-        } else if ($url === 'http://api.people.com/article/1.xml') {
-            if ($method === Client::DELETE) {
-                return array('id' => 1, 'title' => 'test');
-            } else if ($method === Client::GET) {
-                return array('id' => 1, 'title' => 'test');
-            }
-        }
-        return array();
     }
 }
