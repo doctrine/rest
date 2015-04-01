@@ -35,8 +35,10 @@ class Request
     private $_url;
     private $_method = Client::GET;
     private $_parameters = array();
+    private $_headers = array();
     private $_username;
     private $_password;
+    private $_requestType;
     private $_responseType = 'xml';
     private $_responseTransformerImpl;
 
@@ -80,6 +82,16 @@ class Request
         return $this->_responseType;
     }
 
+    public function setRequestType($requestType)
+    {
+        $this->_requestType = $requestType;
+    }
+
+    public function getRequestType()
+    {
+        return ($this->_requestType?$this->_requestType:$this->getResponseType());
+    }
+
     public function setUsername($username)
     {
         $this->_username = $username;
@@ -98,6 +110,16 @@ class Request
     public function getPassword()
     {
         return $this->_password;
+    }
+
+    public function setHeaders($headers)
+    {
+        $this->_headers = $headers;
+    }
+
+    public function getHeaders()
+    {
+        return $this->_headers;
     }
 
     public function setResponseTransformerImpl($responseTransformerImpl)

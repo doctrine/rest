@@ -67,7 +67,7 @@ class Client
         curl_setopt($ch, CURLOPT_URL, $request->getUrl());
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Expect:'));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $request->getHeaders());
 
         $username = $request->getUsername();
         $password = $request->getPassword();
@@ -76,11 +76,35 @@ class Client
             curl_setopt ($ch, CURLOPT_USERPWD, $username . ':' . $password);
         }
 
+        if($request->getMethod()==self::POST || $request->getMethod()==self::PUT) {
+
+            if($request->getRequestType()=='json') {
+                $requestBody = json_encode($request->getParameters());
+                $requestLength = strlen($requestBody);
+
+                $fh = fopen('php://memory', 'rw');
+                fwrite($fh, $requestBody);
+                rewind($fh);
+
+                $headers = array_merge($request->getHeaders(), array(
+                    'Expect:',
+                    'Content-length: '.$requestLength,
+                    'Content-type: application/json;charset="utf-8"'
+                ));
+
+                curl_setopt($ch, CURLOPT_INFILE, $fh);
+                curl_setopt($ch, CURLOPT_INFILESIZE, $requestLength);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            } else {
+                curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($request->getParameters()));
+            }
+        }
         switch ($request->getMethod()) {
             case self::POST:
-            case self::PUT:
                 curl_setopt($ch, CURLOPT_POST, 1);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($request->getParameters()));
+                break;
+            case self::PUT:
+                curl_setopt($ch, CURLOPT_PUT, 1);
                 break;
             case self::DELETE:
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
@@ -91,7 +115,7 @@ class Client
         }
 
         $result = curl_exec($ch);
-
+        xdebug_var_dump($result);
         if ( ! $result) {
             $errorNumber = curl_errno($ch);
             $error = curl_error($ch);

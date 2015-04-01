@@ -192,6 +192,16 @@ class EntityConfiguration
         return $this->_attributes['responseTransformerImpl'];
     }
 
+    public function setHeaders($headers)
+    {
+        $this->_attributes['headers'] = $headers;
+    }
+
+    public function getHeaders()
+    {
+        return $this->_attributes['headers'];
+    }
+
     public function newInstance()
     {
         if ($this->_prototype === null) {

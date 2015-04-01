@@ -83,7 +83,7 @@ abstract class Entity
     {
         $parameters = $this->toArray();
         $exists = $this->exists();
-        $method = $exists ? Client::POST : Client::PUT;
+        $method = $exists ? Client::PUT : Client::POST;
         $id = $exists ? $this->getIdentifier() : null;
         $path = $this->generateUrl(get_defined_vars());
         return self::$_manager->execute($this, $path, $method, $parameters, $action);
